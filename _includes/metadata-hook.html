@@ -1,0 +1,46 @@
+<style>
+/* Avatar hover effect - smooth transition with zoom */
+#avatar {
+  position: relative;
+  display: block;
+  width: 112px;
+  height: 112px;
+  overflow: visible;
+}
+
+#avatar img {
+  width: 112px;
+  height: 112px;
+  object-fit: cover;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: scale(1);
+}
+
+#avatar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 112px;
+  height: 112px;
+  background-image: url("/assets/img/avatar-hover.png");
+  background-size: 112px 112px;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(1);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+#avatar:hover img {
+  opacity: 0;
+  transform: scale(1.1);
+}
+
+#avatar:hover::after {
+  opacity: 1;
+  transform: scale(1.1);
+}
+</style>

@@ -3,6 +3,8 @@ title: "TryHackMe - Dreaming"
 date: 2025-12-15 10:00:00 +0000
 categories: [TryHackMe, Easy]
 tags: [pluck-cms, cve-2020-29607, command-injection, python-hijacking, privesc, mysql]
+image:
+  path: https://cdn.jsdelivr.net/gh/grok-rs/blog-images@main/tryhackme/2025/12-dreaming/cover.png
 ---
 
 ## The Hunt Begins
