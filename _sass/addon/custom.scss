@@ -1,0 +1,32 @@
+/* Avatar hover effect - swap to red crab */
+#avatar img {
+  transition: opacity 0.3s ease;
+}
+
+#avatar {
+  position: relative;
+}
+
+#avatar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 112px;
+  height: 112px;
+  background-image: url("/assets/img/avatar-hover.png");
+  background-size: cover;
+  background-position: center;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+#avatar:hover::after {
+  opacity: 1;
+}
+
+#avatar:hover img {
+  opacity: 0;
+}
