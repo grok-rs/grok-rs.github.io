@@ -30,3 +30,17 @@
 #avatar:hover img {
   opacity: 0;
 }
+
+/* Post image hover effect - indicate clickable */
+.popup.img-link img {
+  cursor: pointer !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease !important;
+}
+
+.popup.img-link:hover img {
+  cursor: pointer !important;
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  filter: brightness(1.05);
+}
+
