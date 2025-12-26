@@ -44,3 +44,25 @@
   filter: brightness(1.05);
 }
 
+/* Post cover images - show full image without cropping */
+.preview-img img,
+#post-list .preview-img img {
+  object-fit: contain !important;
+  background-color: var(--card-bg);
+}
+
+/* Card preview - adjust to show full image */
+#post-list .card .preview-img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--card-bg);
+}
+
+/* Hide description text inside post pages */
+.post-content > p:first-of-type:has(+ .post-meta),
+#post-list + .post-content > p:first-child,
+main .post-desc {
+  display: none !important;
+}
+

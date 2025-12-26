@@ -18,36 +18,7 @@ image:
 | OS | Linux (Ubuntu) |
 | Attack Chain | `www-data → lucien → death → morpheus → root` |
 
-### Attack Summary
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  RECONNAISSANCE                                                  │
-│  nmap → ports 22 (SSH), 80 (HTTP/Apache)                        │
-└──────────────────────────┬──────────────────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  ENUMERATION                                                     │
-│  gobuster → /app/pluck-4.7.13 (CMS with default creds)          │
-└──────────────────────────┬──────────────────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  INITIAL ACCESS (CVE-2020-29607)                                │
-│  Pluck file upload RCE → .phar extension bypass → www-data      │
-└──────────────────────────┬──────────────────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  LATERAL MOVEMENT                                                │
-│  /opt/test.py credentials → SSH as lucien                       │
-│  MySQL command injection → shell as death                       │
-└──────────────────────────┬──────────────────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  PRIVILEGE ESCALATION                                            │
-│  Writable shutil.py + cron job → morpheus                       │
-│  sudo ALL → root                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+Dreaming was a room featuring multiple lateral movements through different users. We started by discovering a Pluck CMS installation through directory enumeration and exploited a file upload vulnerability to gain initial access. From there, we found hardcoded credentials in a Python script to pivot to the first user, then leveraged command injection in a MySQL backup script to move to the next. Finally, we exploited a Python library hijacking vulnerability via a writable module and cron job to reach a user with full sudo privileges, giving us root access.
 
 ### Tools Used
 
