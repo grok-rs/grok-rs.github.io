@@ -5,7 +5,7 @@ date: 2025-12-26
 categories: [TryHackMe]
 tags: [ctf, tryhackme, easy, tls, certificates, socat, encoding, base64, base32, md5]
 image:
-  path: /tryhackme/2025/b3dr0ck/cover.png
+  path: /assets/img/tryhackme/2025/b3dr0ck/cover.png
   alt: TryHackMe B3dr0ck Room
 ---
 

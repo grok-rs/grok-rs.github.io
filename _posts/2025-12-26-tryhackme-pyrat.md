@@ -5,7 +5,7 @@ date: 2025-12-26
 categories: [TryHackMe]
 tags: [ctf, tryhackme, easy, python, remote-code-execution, git-credentials, brute-force, socket-programming]
 image:
-  path: /tryhackme/2025/pyrat/cover.png
+  path: /assets/img/tryhackme/2025/pyrat/cover.png
   alt: TryHackMe Pyrat Room
 ---
 

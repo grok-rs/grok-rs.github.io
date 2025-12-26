@@ -5,7 +5,7 @@ date: 2025-12-19
 categories: [TryHackMe]
 tags: [ctf, tryhackme, easy, pluck-cms, command-injection, privilege-escalation, python-library-hijacking, cve-2020-29607]
 image:
-  path: /tryhackme/2025/dreaming/cover.png
+  path: /assets/img/tryhackme/2025/dreaming/cover.png
   alt: TryHackMe Dreaming Room
 ---
 

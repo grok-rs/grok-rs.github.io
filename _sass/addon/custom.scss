@@ -49,6 +49,8 @@
 #post-list .preview-img img {
   object-fit: contain !important;
   background-color: var(--card-bg);
+  border: none !important;
+  outline: none !important;
 }
 
 /* Card preview - adjust to show full image */
@@ -56,7 +58,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--card-bg);
+  background: var(--card-bg) !important;
 }
 
 /* Hide description text inside post pages */
