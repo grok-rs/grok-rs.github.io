@@ -324,7 +324,7 @@ THM{[REDACTED]}
 
 ## References
 
-- [socat - Multipurpose Relay](http://www.dest-unreach.org/socat/)
+- [socat - Multipurpose Relay](https://www.dest-unreach.org/socat/)
 - [OpenSSL Certificate Commands](https://www.openssl.org/docs/man1.1.1/man1/)
 - [CrackStation - Online Hash Cracking](https://crackstation.net/)
 - [Base64 and Base32 Encoding](https://en.wikipedia.org/wiki/Base64)
