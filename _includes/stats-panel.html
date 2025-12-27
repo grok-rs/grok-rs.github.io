@@ -1,0 +1,59 @@
+<!-- Blog Statistics Panel -->
+
+{% assign total_posts = site.posts | size %}
+
+{% assign easy_posts = site.posts | where_exp: "post", "post.tags contains 'easy'" | size %}
+{% assign medium_posts = site.posts | where_exp: "post", "post.tags contains 'medium'" | size %}
+{% assign hard_posts = site.posts | where_exp: "post", "post.tags contains 'hard'" | size %}
+
+<section>
+  <h2 class="panel-heading">{{ site.data.locales[include.lang].panel.stats | default: "Statistics" }}</h2>
+  <div class="mt-3 mb-1">
+    <div class="d-flex justify-content-between mb-2">
+      <span><i class="fas fa-file-alt fa-fw me-1"></i>Total Writeups</span>
+      <span class="fw-bold">{{ total_posts }}</span>
+    </div>
+
+    {% if site.categories.size > 0 %}
+    <div class="mb-2">
+      <span class="d-block mb-1"><i class="fas fa-folder fa-fw me-1"></i>Platforms</span>
+      <div class="ps-3">
+        {% for category in site.categories %}
+          {% assign cat_name = category | first %}
+          {% assign cat_posts = category | last | size %}
+          <div class="d-flex justify-content-between">
+            <a href="{{ cat_name | slugify | prepend: '/categories/' | append: '/' | relative_url }}" class="text-muted">{{ cat_name }}</a>
+            <span>{{ cat_posts }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if easy_posts > 0 or medium_posts > 0 or hard_posts > 0 %}
+    <div class="mb-2">
+      <span class="d-block mb-1"><i class="fas fa-signal fa-fw me-1"></i>Difficulty</span>
+      <div class="ps-3">
+        {% if easy_posts > 0 %}
+        <div class="d-flex justify-content-between">
+          <a href="{{ '/tags/easy/' | relative_url }}" class="text-muted">Easy</a>
+          <span>{{ easy_posts }}</span>
+        </div>
+        {% endif %}
+        {% if medium_posts > 0 %}
+        <div class="d-flex justify-content-between">
+          <a href="{{ '/tags/medium/' | relative_url }}" class="text-muted">Medium</a>
+          <span>{{ medium_posts }}</span>
+        </div>
+        {% endif %}
+        {% if hard_posts > 0 %}
+        <div class="d-flex justify-content-between">
+          <a href="{{ '/tags/hard/' | relative_url }}" class="text-muted">Hard</a>
+          <span>{{ hard_posts }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
