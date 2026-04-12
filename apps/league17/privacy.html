@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>League17 Helper — Privacy Policy</title>
+  <style>
+    body { max-width: 720px; margin: 3rem auto; padding: 0 1.25rem;
+      font: 15px/1.6 system-ui, -apple-system, Segoe UI, sans-serif;
+      color: #1e3955; background: #fbfcfe; }
+    h1 { border-bottom: 1px solid #c8d0dc; padding-bottom: .3em; }
+    h2 { margin-top: 2em; color: #2a6db5; }
+    code { background: #eef3f9; padding: 1px 4px; border-radius: 3px; }
+    ul { padding-left: 1.2em; }
+    footer { margin-top: 3em; padding-top: 1em; border-top: 1px solid #c8d0dc;
+      color: #6b7d90; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>League17 Helper — Privacy Policy</h1>
+  <p>This browser extension (<em>League17</em>, Chrome Web Store item
+    <code>fopdncbnfjpecmefpgipmlbeanflfpmg</code>) does not collect,
+    transmit, or sell any personal user data.</p>
+
+  <h2>What the extension stores locally</h2>
+  <ul>
+    <li>UI preferences (panel visibility, log level, overlay toggles)</li>
+    <li>Per-user configuration for optional in-game notifications
+      (Telegram bot token and chat id, ntfy.sh topic) — only when the
+      user explicitly enters them in the extension's Settings pane</li>
+    <li>Aggregated local statistics (counters, timestamps)</li>
+  </ul>
+  <p>All of the above is stored <strong>exclusively on the user's
+    device</strong> via <code>chrome.storage.sync</code> and
+    <code>localStorage</code>. None of it is transmitted to any server
+    operated by the extension author.</p>
+
+  <h2>Third-party services reached only if the user opts in</h2>
+  <ul>
+    <li><code>api.telegram.org</code> — contacted only if the user
+      has entered a Telegram bot token and triggered a notification.</li>
+    <li><code>ntfy.sh</code> — contacted only if the user has entered
+      an ntfy topic and enabled that alert sink.</li>
+  </ul>
+  <p>Both calls are made directly from the user's browser to those
+    services. The extension author does not proxy, intercept, or log
+    them.</p>
+
+  <h2>What the extension never does</h2>
+  <ul>
+    <li>Does not sell or transfer user data to third parties.</li>
+    <li>Does not use or transfer user data for purposes unrelated to
+      the extension's single purpose (a companion overlay for
+      <code>game.league17.ru</code>).</li>
+    <li>Does not use or transfer user data to determine creditworthiness
+      or for lending purposes.</li>
+  </ul>
+
+  <h2>Contact</h2>
+  <p>Questions or requests: <a href="mailto:kalyuzhni.sergei@gmail.com">kalyuzhni.sergei@gmail.com</a></p>
+
+  <footer>Last updated: 2026-04-13.</footer>
+</body>
+</html>
